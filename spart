@@ -1,12 +1,19 @@
 #!/usr/bin/python3
 
-import sys,os,subprocess,shlex
+import sys,os,subprocess,shlex,math
 
 try:
   proc = subprocess.Popen(['scontrol','-o','show','partition'], stdout=subprocess.PIPE,universal_newlines=True)
 except:
   exit
 else:
+  print('Partition'.ljust(30) + 'State'.ljust(11) + 'Cores'.ljust(12) + 'GPUs'.ljust(8) + 'Mem/Node(GB)'.ljust(14) + 'Nodes'.ljust(10) + 'Time Limit'.ljust(10))
   for line in proc.stdout:
     p = dict(s.split("=", 1) for s in shlex.split(line) if '=' in s)
-    print(p['PartitionName'],p['State'],p['TotalNodes'],p['TotalCPUs'],p['MaxTime'])
+    tres = dict(s.split("=", 1) for s in shlex.split(p['TRES'].replace(",", " ")) if '=' in s)
+    if 'gres/gpu' in tres:
+      gpu=tres['gres/gpu']
+    else:
+      gpu=0
+    avemem=math.floor(float(tres['mem'].strip('M'))/float(tres['node'])/1024)
+    print(p['PartitionName'].ljust(30),p['State'].ljust(10),p['TotalCPUs'].ljust(10),str(gpu).ljust(10),str(avemem).ljust(10),p['TotalNodes'].ljust(10),p['MaxTime'].ljust(10))
