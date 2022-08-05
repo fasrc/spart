@@ -1,0 +1,12 @@
+#!/usr/bin/python3
+
+import sys,os,subprocess,shlex
+
+try:
+  proc = subprocess.Popen(['scontrol','-o','show','partition'], stdout=subprocess.PIPE,universal_newlines=True)
+except:
+  exit
+else:
+  for line in proc.stdout:
+    p = dict(s.split("=", 1) for s in shlex.split(line) if '=' in s)
+    print(p['PartitionName'],p['State'],p['TotalNodes'],p['TotalCPUs'],p['MaxTime'])
